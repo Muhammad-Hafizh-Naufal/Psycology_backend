@@ -2,6 +2,11 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+
+import userRoutes from "./route/userRoutes";
+
+dotenv.config();
 
 async function main() {
   try {
@@ -15,9 +20,7 @@ async function main() {
     app.use(cors());
     app.use(bodyParser.json());
 
-    app.get("/", (req, res) => {
-      res.send("Hello World!");
-    });
+    app.use("/api/users", userRoutes);
 
     app.listen(PORT, () => {
       console.log(`Server is running on  http://localhost:${PORT}`);
