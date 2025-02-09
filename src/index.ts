@@ -18,9 +18,14 @@ async function main() {
     console.log("Database status", checkConnection);
 
     app.use(cors());
-    app.use(bodyParser.json());
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
-    app.use("/api/users", userRoutes);
+    app.get("/", (req, res) => {
+      res.status(200).json({ message: "Server is running" });
+    });
+
+    app.use("/api", userRoutes);
 
     app.listen(PORT, () => {
       console.log(`Server is running on  http://localhost:${PORT}`);
