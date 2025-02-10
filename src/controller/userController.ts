@@ -61,6 +61,8 @@ export default {
       password,
     } = req.body as TRegister;
 
+    const fileUrl = req.file ? req.file.filename : null;
+
     try {
       await registerValidateSchema.validate({
         fullName,
@@ -104,6 +106,7 @@ export default {
           alamat,
           role,
           email,
+          fileUrl,
           password,
         },
       });
