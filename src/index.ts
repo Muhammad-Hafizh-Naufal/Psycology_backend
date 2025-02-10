@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";

@@ -16,7 +16,7 @@ datasource db {
 model User {
   id          Int      @id @default(autoincrement())
   fullName    String
-  npm         Int      @unique
+  npm         String      @unique
   jurusan     String
   lokasiKampus String
   tempatLahir String

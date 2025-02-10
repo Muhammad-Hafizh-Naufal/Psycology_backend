@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `user` MODIFY `npm` VARCHAR(191) NOT NULL;
