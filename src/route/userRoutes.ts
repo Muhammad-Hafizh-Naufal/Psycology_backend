@@ -11,6 +11,7 @@ router.post(
   upload.single("fileUrl"),
   userController.register
 );
+router.post("/auth/login", userController.login);
 router.put("/users/update/:npm", userController.update);
 router.delete("/users/delete/:npm", userController.delete);
 
