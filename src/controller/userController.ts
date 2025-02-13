@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { AuthRequest } from "../types/auth";
 import { Request, Response } from "express";
 import * as yup from "yup";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
-const SECRET_KEY = process.env.SECRET_KEY as string;
+const SECRET_KEY = process.env.JWT_SECRET as string;
 
 type TRegister = {
   fullName: string;
@@ -46,9 +47,13 @@ const registerValidateSchema = yup.object({
 });
 
 function generateToken(user: any) {
-  return jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
+  return jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    SECRET_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
 }
 
 export default {
@@ -142,6 +147,7 @@ export default {
     try {
       const { email, password } = req.body as TLogin;
 
+      // ambil data berdasarkan email
       const user = await prisma.user.findUnique({
         where: { email: email },
       });
@@ -151,6 +157,7 @@ export default {
         return;
       }
 
+      // cek password
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
@@ -158,40 +165,58 @@ export default {
         return;
       }
 
-      res.json({ message: "Login Success" });
-
-      // masih bug jwt
       // Generate JWT token
       const token = generateToken(user);
 
-      res.status(200).json({ message: "Success Login", token });
+      res.status(200).json({ message: "Success Login", data: user, token });
     } catch (error) {
       const err = error as Error;
       res.status(400).json({ message: "Failed Login", err });
     }
   },
 
+  // //  Me
+  // async me(req: Request, res: Response) {},
+
   // Get Profile
-  // async getProfile(req: Request, res: Response) {
-  //   const user = req.user;
+  async getProfile(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.id;
 
-  //   try {
-  //     const userData = await prisma.user.findUnique({
-  //       where: {
-  //         id: user.id,
-  //       },
-  //     });
+    if (!userId) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
 
-  //     if (!userData) {
-  //       return res.status(404).json({ message: "User Not Found" });
-  //     }
+    try {
+      const userData = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          fullName: true,
+          npm: true,
+          jurusan: true,
+          lokasiKampus: true,
+          tempatLahir: true,
+          tanggalLahir: true,
+          jenisKelamin: true,
+          alamat: true,
+          email: true,
+          role: true,
+          fileUrl: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-  //     res.status(200).json({ message: "User Profile", data: userData });
-  //   } catch (error) {
-  //     const err = error as Error;
-  //     res.status(400).json({ message: "Failed Get Profile", err });
-  //   }
-  // },
+      if (!userData) {
+        return res.status(404).json({ message: "User Not Found" });
+      }
+
+      res.status(200).json({ message: "User Profile", data: userData });
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error", error: error });
+    }
+  },
 
   // Update
   async update(req: Request, res: Response) {
