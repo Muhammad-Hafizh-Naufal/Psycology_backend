@@ -1,12 +1,20 @@
 import { PrismaClient } from "@prisma/client";
-import { AuthRequest } from "../types/auth";
-import { Request, Response } from "express";
+
+import { Request, Response, NextFunction } from "express";
 import * as yup from "yup";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET as string;
+
+// Custom Request
+interface CustomRequest extends Request {
+  userData?: {
+    id: string;
+    role: string;
+  };
+}
 
 type TRegister = {
   fullName: string;
@@ -45,16 +53,6 @@ const registerValidateSchema = yup.object({
     .oneOf([yup.ref("password")], "Password not match")
     .required(),
 });
-
-function generateToken(user: any) {
-  return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    SECRET_KEY,
-    {
-      expiresIn: "1h",
-    }
-  );
-}
 
 export default {
   // List All User
@@ -165,31 +163,46 @@ export default {
         return;
       }
 
-      // Generate JWT token
-      const token = generateToken(user);
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        SECRET_KEY,
+        {
+          expiresIn: "1h",
+        }
+      );
 
-      res.status(200).json({ message: "Success Login", data: user, token });
+      res.status(200).json({
+        message: "Success Login",
+        data: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
+        token,
+      });
     } catch (error) {
       const err = error as Error;
       res.status(400).json({ message: "Failed Login", err });
     }
   },
 
-  // //  Me
-  // async me(req: Request, res: Response) {},
-
   // Get Profile
-  async getProfile(req: Request, res: Response) {
-    const authReq = req as AuthRequest;
-    const userId = authReq.user?.id;
+  async getProfile(req: CustomRequest, res: Response) {
+    const userId = req.userData?.id;
 
     if (!userId) {
-      return res.status(404).json({ message: "User Not Found" });
+      res.status(404).json({ message: "User Not Found" });
+      return; // Ensure the function exits after sending the response
     }
 
     try {
       const userData = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { id: Number(userId) },
         select: {
           id: true,
           fullName: true,
@@ -209,7 +222,8 @@ export default {
       });
 
       if (!userData) {
-        return res.status(404).json({ message: "User Not Found" });
+        res.status(404).json({ message: "User Not Found" });
+        return; // Ensure the function exits after sending the response
       }
 
       res.status(200).json({ message: "User Profile", data: userData });

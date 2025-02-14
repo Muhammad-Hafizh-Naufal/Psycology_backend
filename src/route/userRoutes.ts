@@ -1,7 +1,7 @@
 import express from "express";
 
 import userController from "../controller/userController";
-// import authenticate from "../middleware/authMiddleware";
+import { accessValidation } from "../middleware/authMiddleware";
 import upload from "../middleware/uploadMiddleware";
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.post(
   userController.register
 );
 router.post("/auth/login", userController.login);
-router.get("/auth/proile");
+router.get("/auth/profile", accessValidation, userController.getProfile);
 router.put("/users/update/:npm", userController.update);
 router.delete("/users/delete/:npm", userController.delete);
 
