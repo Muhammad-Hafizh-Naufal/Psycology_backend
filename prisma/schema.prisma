@@ -17,15 +17,24 @@ model User {
   id          Int      @id @default(autoincrement())
   fullName    String
   npm         String      @unique
+  kelas       String
   jurusan     String
   lokasiKampus String
   tempatLahir String
   tanggalLahir DateTime
   jenisKelamin String
   alamat      String
+  noHP        String
   email       String   @unique
+  ipk         String
   role        String   @default("user")
-  fileUrl     String?
+  cvUrl            String?  
+  krsUrl           String?  
+  pasFotoUrl       String?  
+  ktmUrl           String?  
+  ktpUrl           String?  
+  rangkumanNilaiUrl String? 
+  certificateUrl   String?  
   password    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

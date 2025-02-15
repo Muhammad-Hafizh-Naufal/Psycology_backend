@@ -16,12 +16,23 @@ const filterFile = (
   file: Express.Multer.File,
   cb: any
 ) => {
-  if (file.mimetype.startsWith("image/")) {
+  if (
+    file.mimetype.startsWith("image/") ||
+    file.mimetype === "application/pdf"
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Only Image Files!"), false);
+    cb(new Error("Only Image & PDF Files!"), false);
   }
 };
 
-const upload = multer({ storage, fileFilter: filterFile });
+const upload = multer({ storage, fileFilter: filterFile }).fields([
+  { name: "cv", maxCount: 1 },
+  { name: "krs", maxCount: 1 },
+  { name: "pasFoto", maxCount: 1 },
+  { name: "ktm", maxCount: 1 },
+  { name: "ktp", maxCount: 1 },
+  { name: "rangkumanNilai", maxCount: 1 },
+  { name: "certificate", maxCount: 1 },
+]);
 export default upload;

@@ -34,3 +34,15 @@ export const accessValidation = (
     res.status(403).json({ message: "Invalid Token", error: err.message });
   }
 };
+
+export const adminValidation = (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.userData?.role !== "admin") {
+    res.status(403).json({ message: "Access Denied, Admin Only" });
+    return;
+  }
+  next();
+};
