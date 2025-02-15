@@ -79,18 +79,23 @@ const updateValidateSchema = yup.object({
 
 export default {
   // List All User
+
+  // List All User dengan Fitur Search
   async getAllUsers(req: Request, res: Response) {
-    const { search } = req.query;
+    const { search } = req.query; // Ambil parameter search dari query
 
     try {
+      const searchTerm = (search as string)?.toLowerCase();
       const users = await prisma.user.findMany({
-        where: {
-          OR: [
-            { fullName: { contains: search as string } },
-            { npm: { contains: search as string } },
-            { email: { contains: search as string } },
-          ],
-        },
+        where: searchTerm
+          ? {
+              OR: [
+                { fullName: { contains: searchTerm } }, // Cari berdasarkan nama
+                { npm: { contains: searchTerm } }, // Cari berdasarkan NPM
+                { email: { contains: searchTerm } }, // Cari berdasarkan email
+              ],
+            }
+          : {},
         select: {
           id: true,
           fullName: true,
@@ -117,10 +122,13 @@ export default {
           updatedAt: true,
         },
       });
+
       res.status(200).json(users);
     } catch (error) {
       const err = error as Error;
-      res.status(400).json({ message: "Failed Get All User", err });
+      res
+        .status(500)
+        .json({ message: "Internal Server Error", error: err.message });
     }
   },
 
