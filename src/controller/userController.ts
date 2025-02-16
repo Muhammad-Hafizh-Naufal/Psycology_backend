@@ -148,6 +148,30 @@ export default {
     }
   },
 
+  // Get User by npm
+  async getUserByNpm(req: Request, res: Response) {
+    const { npm } = req.params;
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          npm,
+        },
+      });
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      const err = error as Error;
+      res
+        .status(500)
+        .json({ message: "Internal Server Error", error: err.message });
+    }
+  },
+
   // Register
   async register(req: Request, res: Response) {
     const {

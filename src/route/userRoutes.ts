@@ -10,6 +10,7 @@ import upload from "../middleware/uploadMiddleware";
 const router = express.Router();
 
 router.get("/users", userController.getAllUsers);
+router.get("/users/:npm", userController.getUserByNpm);
 router.post("/auth/register", upload, userController.register);
 router.post("/auth/login", userController.login);
 router.get("/auth/profile", accessValidation, userController.getProfile);
