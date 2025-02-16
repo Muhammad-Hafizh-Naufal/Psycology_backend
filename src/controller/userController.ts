@@ -123,7 +123,23 @@ export default {
         },
       });
 
-      res.status(200).json(users);
+      const baseUrl = "http://localhost:3000/api/uploads/";
+      const usersWithImageUrl = users.map((user) => ({
+        ...user,
+        cvUrl: user.cvUrl ? `${baseUrl}${user.cvUrl}` : null,
+        krsUrl: user.krsUrl ? `${baseUrl}${user.krsUrl}` : null,
+        pasFotoUrl: user.pasFotoUrl ? `${baseUrl}${user.pasFotoUrl}` : null,
+        ktmUrl: user.ktmUrl ? `${baseUrl}${user.ktmUrl}` : null,
+        ktpUrl: user.ktpUrl ? `${baseUrl}${user.ktpUrl}` : null,
+        rangkumanNilaiUrl: user.rangkumanNilaiUrl
+          ? `${baseUrl}${user.rangkumanNilaiUrl}`
+          : null,
+        certificateUrl: user.certificateUrl
+          ? `${baseUrl}${user.certificateUrl}`
+          : null,
+      }));
+
+      res.status(200).json(usersWithImageUrl);
     } catch (error) {
       const err = error as Error;
       res
